@@ -8,7 +8,12 @@ import numpy as np
 #tf.enable_eager_execution()
 import time
 import os
-#from learn_lstm import make_weeked_visits
+from keras.models import load_model
+from learn_nn import tf_score, load_users_and_items
+
+from keras.utils.generic_utils import get_custom_objects
+get_custom_objects().update({"tf_score": tf_score})
+
 
 print "Loading"
 users = pickle.load(open(sys.argv[1]))
@@ -18,6 +23,9 @@ known_target = (sys.argv[3] == 'train')
 start_ts = int(datetime.datetime.strptime(sys.argv[4], "%Y-%m-%d %H:%M:%S").strftime("%s"))
 
 feat_out = open(sys.argv[6], 'w')
+
+user_map, item_map = load_users_and_items(sys.argv[8], sys.argv[9])
+model = load_model(sys.argv[7])
 
 weights = {'like' : 0.5, 'view' : 0.1, 'skip' : -0.1, 'dislike' : -10}
 weights2 = {CT_LIKE : 0.5, CT_VIEW : 0.1, CT_SKIP : -0.1, CT_DISLIKE : -10}
@@ -151,7 +159,7 @@ with open(sys.argv[5]) as csvfile:
                 s += item.get(OT_GLOBAL, event, rt, '', ts) * weights2[event]
         f.append(try_div(s, item_size, -100)) # 11
 
-        for ot in [OT_GENDER, OT_AGE, OT_JOB, OT_MARITAL, OT_PRODUCT, OT_MCC]:
+        for ot in [OT_GENDER, OT_AGE, OT_JOB, OT_MARITAL, OT_PRODUCT, OT_MCC]: # 12-41
             user_ct = CT_HAS if ot != OT_MCC else CT_TRANSACTION
 
             #def cos_prob(user, item, ot_type, user_ct_type, event_ct_type, show_ct_type, rt_type, ts):
@@ -166,6 +174,15 @@ with open(sys.argv[5]) as csvfile:
             f.append(p_dislike)
             f.append(w)
 
+        # 42-45
+        x = [np.array([user_map[user_id]]), np.array([item_map[item_id]])]
+        y = model.predict(x)[0]
+        f.append(y[0])
+        f.append(y[1])
+        f.append(y[2])
+        f.append(y[3])
+
+        # 46 - 99
         for t in ['M', 'F']:
             f.append(user.get(OT_GENDER, CT_HAS, RT_SUM, t, ts))
 
@@ -193,5 +210,8 @@ with open(sys.argv[5]) as csvfile:
             pass
 
         feat_out.write('%d\t%d\t%f\t%d\t%s\n' % (user_id, item_id, target, pid, '\t'.join([str(ff) for ff in f])))
+
+exit()
+
 
 

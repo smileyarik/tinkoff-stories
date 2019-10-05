@@ -1,3 +1,4 @@
+import json
 import time
 import random
 import sys
@@ -5,37 +6,10 @@ import math
 from six.moves import xrange
 from catboost import Pool, CatBoostClassifier
 
-class LoglossObjective(object):
-    def calc_ders_range(self, approxes, targets, weights):
-        # approxes, targets, weights are indexed containers of floats
-        # (containers with only __len__ and __getitem__ defined).
-        # weights parameter can be None.
-        # Returns list of pairs (der1, der2)
-        assert len(approxes) == len(targets)
-        if weights is not None:
-            assert len(weights) == len(approxes)
+def sigmoid(x):
+  return 1 / (1 + math.exp(-x))
 
-        exponents = []
-        for index in xrange(len(approxes)):
-            exponents.append(math.exp(approxes[index]))
-
-        result = []
-        for index in xrange(len(targets)):
-            p = exponents[index] / (1 + exponents[index])**2
-            der1 = 2 * p * targets[index]
-            der2 = -2 * p * (exponents[index] - 1) * targets[index] / (exponents[index] + 1)
-            #if approxes[index] != 0.0:
-            #    time.sleep(random.random() * 5.)
-            #    print approxes[index], targets[index], der1, der2
-
-            if weights is not None:
-                der1 *= weights[index]
-                der2 *= weights[index]
-
-            result.append((der1, der2))
-
-        return result
-
+class CustomMetric(object):
     def get_final_error(self, error, weight):
         return error / (weight + 1e-38)
 
@@ -43,30 +17,33 @@ class LoglossObjective(object):
         return True
 
     def evaluate(self, approxes, target, weight):
-        # approxes is list of indexed containers
-        # (containers with only __len__ and __getitem__ defined), one container
-        # per approx dimension. Each container contains floats.
-        # weight is one dimensional indexed container.
-        # target is float.   
-        # weight parameter can be None.
-        # Returns pair (error, weights sum)
+        #print len(approxes), len(approxes[0]), len(target)
+        # approxes - list of list-like objects (one object per approx dimension)
+        # target - list-like object
+        # weight - list-like object, can be None
+        #scores = {0 : -10., 1 : -0.1, 2 : 0.1, 3 : 0.5}
+        scores = {0 : -10., 1 : -0.1, 2 : 0.1, 3 : 0.5}
+        error_sum = 0.
+        weight_sum = 0.
+        for i in xrange(0,len(target)):
+            e = 0
+            exp_sum = 0
+            for j in xrange(0,4):
+                exp_sum += math.exp(approxes[j][i])
+            for j in xrange(0,4):
+                e += (math.exp(approxes[j][i]) / exp_sum) * scores[j]
+            #if i % 10000 == 0:
+            #    print [approxes[x][i] for x in xrange(0,4)]
+            #    print [math.exp(approxes[x][i]) / exp_sum for x in xrange(0,4)], target[i], e
 
-        assert len(approxes) == 1
-        assert len(target) == len(approxes[0])
+            if e > 0:
+                error_sum += float(scores[int(target[i])])
+            else:
+                error_sum -= float(scores[int(target[i])])
+            weight_sum += 1
 
-        approx = approxes[0]
-
-        error_sum = 0.0
-        weight_sum = 0.0
-
-        for i in xrange(len(approx)):
-            w = 1.0 if weight is None else weight[i]
-            weight_sum += w
-            error_sum += w * target[i] * (2. / (1 + math.exp(-approx[i])) - 1.)
-
+        #print error_sum, weight_sum
         return error_sum, weight_sum
-
-
 
 train_pool = Pool(data=sys.argv[1], column_description='cd')
 eval_pool = Pool(data=sys.argv[2], column_description='cd')
@@ -77,9 +54,10 @@ eval_pool = Pool(data=sys.argv[2], column_description='cd')
 #                           iterations=int(sys.argv[4]),
 #                           ignored_features=[])
 model = CatBoostClassifier(loss_function='MultiClass',
+                           eval_metric=CustomMetric(),
                            iterations=int(sys.argv[4]),
                            ignored_features=[])
-                           #ignored_features=xrange(12,42))
+                           #ignored_features=xrange(46,100))
 
 # Fit model
 model.fit(train_pool, eval_set=eval_pool)
@@ -90,6 +68,8 @@ preds_class = model.predict(eval_pool,
                           prediction_type='Class')
 
 model.save_model(sys.argv[3])
+
+print model.get_feature_importance(prettified=True)
 
 labels = eval_pool.get_label()
 s = 0
