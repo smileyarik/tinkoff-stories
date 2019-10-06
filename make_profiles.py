@@ -11,6 +11,12 @@ import pickle
 def make_counters():
     return Counters()
 
+def date_to_timestamp(strdate):
+    # windows doesn't support "%s", so let's use explicit calculation for timestamp
+    epoch = datetime.datetime(1970,1,1)
+    event_time = datetime.datetime.strptime(strdate, "%Y-%m-%d %H:%M:%S")
+    return int((event_time - epoch).total_seconds())
+
 if __name__ == '__main__':
     item_counters = defaultdict(make_counters)
     user_counters = defaultdict(make_counters)
@@ -55,7 +61,7 @@ if __name__ == '__main__':
                 print count
             count += 1
             user_id = int(row[0])
-            ts = int(datetime.datetime.strptime("2018-%2.2d-%2.2d 00:00:00" % (int(row[1]), int(row[2])), "%Y-%m-%d %H:%M:%S").strftime("%s"))
+            ts = date_to_timestamp("2018-%2.2d-%2.2d 00:00:00" % (int(row[1]), int(row[2])))
             user.add(OT_MCC, CT_TRANSACTION, RT_SUM, row[5], float(row[3]), ts)
 
     # PARSE REACTIONS
@@ -74,7 +80,7 @@ if __name__ == '__main__':
             event = event_dict[row[3]]
             user = user_counters[user_id]
             item = item_counters[item_id]
-            ts = int(datetime.datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S").strftime("%s"))
+            ts = date_to_timestamp(row[2])
 
             for rt in [RT_SUM, RT_7D, RT_30D]:
                 item.add(OT_GLOBAL, CT_SHOW, rt, '', 1, ts)
