@@ -14,13 +14,18 @@ from learn_nn import tf_score, load_users_and_items
 from keras.utils.generic_utils import get_custom_objects
 get_custom_objects().update({"tf_score": tf_score})
 
+def date_to_timestamp(strdate):
+    # windows doesn't support "%s", so let's use explicit calculation for timestamp
+    epoch = datetime.datetime(1970,1,1)
+    event_time = datetime.datetime.strptime(strdate, "%Y-%m-%d %H:%M:%S")
+    return int((event_time - epoch).total_seconds())
 
-print "Loading"
-users = pickle.load(open(sys.argv[1]))
-items = pickle.load(open(sys.argv[2]))
+print("Loading")
+users = pickle.load(open(sys.argv[1], 'rb'))
+items = pickle.load(open(sys.argv[2], 'rb'))
 
 known_target = (sys.argv[3] == 'train')
-start_ts = int(datetime.datetime.strptime(sys.argv[4], "%Y-%m-%d %H:%M:%S").strftime("%s"))
+start_ts = date_to_timestamp(sys.argv[4])
 
 feat_out = open(sys.argv[6], 'w')
 
@@ -49,12 +54,12 @@ def cos_prob(user, item, ot_type, user_ct_type, event_ct_type, show_ct_type, rt_
     event_slice = item.slice(ot_type, event_ct_type, rt_type)
     show_slice = item.slice(ot_type, show_ct_type, rt_type)
 
-    for key,c in user_slice.iteritems():
+    for key,c in user_slice.items():
         v = c.get(ts, rt_type)
 
         user_mod += v
 
-    for key,c in show_slice.iteritems():
+    for key,c in show_slice.items():
         v = c.get(ts, rt_type)
 
         item_mod += v*v
@@ -79,21 +84,21 @@ def counter_cos(user, item, ot_type, user_ct_type, item_ct_type, rt_type, ts, db
     item_slice = item.slice(ot_type, item_ct_type, rt_type)
 
     if dbg:
-        print "========="
-        print "User:"
-    for key,c in user_slice.iteritems():
+        print("=========")
+        print("User:)")
+    for key,c in user_slice.items():
         v = c.get(ts, rt_type)
         if dbg:
-            print key, v
+            print(key, v)
 
         user_mod += v*v
 
     if dbg:
-        print "Item:"
-    for key,c in item_slice.iteritems():
+        print("Item:")
+    for key,c in item_slice.items():
         v = c.get(ts, rt_type)
         if dbg:
-            print key, v
+            print(key, v)
 
         item_mod += v*v
         if key in user_slice:
@@ -107,29 +112,30 @@ def counter_cos(user, item, ot_type, user_ct_type, item_ct_type, rt_type, ts, db
         prod = prod / (math.sqrt(user_mod) * math.sqrt(item_mod))
 
     if dbg:
-        print "Cos:", prod
+        print("Cos:", prod)
 
     return prod
 
 
-print "Calc global stat"
+print("Calc global stat")
 full_events = Counters()
-for item_id, item in items.iteritems():
+for item_id, item in items.items():
     for event in [CT_LIKE, CT_VIEW, CT_SKIP, CT_DISLIKE, CT_SHOW]:
         for rt in [RT_SUM, RT_7D, RT_30D]:
             full_events.update_from(item, OT_GLOBAL, event, rt, event, rt, start_ts)
 
-print "Calc features"
+print("Calc features")
 with open(sys.argv[5]) as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
     if not known_target:
         next(reader, None)
     for row in reader:
+        if (len(row)) == 0: continue # stupid windows
         user_id = int(row[0])
         item_id = int(row[1])
         user = users[int(row[0])]
         item = items[int(row[1])]
-        ts = int(datetime.datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S").strftime("%s"))
+        ts = date_to_timestamp(row[2])
         target = 0
         pid = 0
         if known_target:
@@ -192,7 +198,7 @@ with open(sys.argv[5]) as csvfile:
         for t in ['', 'CIV', 'DIV', 'MAR', 'UNM', 'WID']:
             f.append(user.get(OT_MARITAL, CT_HAS, RT_SUM, t, ts))
 
-        for t in xrange(0,23):
+        for t in range(0,23):
             f.append(user.get(OT_JOB, CT_HAS, RT_SUM, str(t), ts))
 
         for ct in [CT_LIKE, CT_VIEW, CT_SKIP, CT_DISLIKE]: # 12-35

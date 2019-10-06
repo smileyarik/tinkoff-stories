@@ -21,15 +21,15 @@ if __name__ == '__main__':
     item_counters = defaultdict(make_counters)
     user_counters = defaultdict(make_counters)
 
-    print "Read user catalogue"
-    with open(sys.argv[4]) as csvfile:
+    print("Read user catalogue")
+    with open(sys.argv[4], encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         next(reader, None)
         for row in reader:
             #customer_id,product_0,product_1,product_2,product_3,product_4,product_5,product_6,gender_cd,age,marital_status_cd,children_cnt,first_session_dttm,job_position_cd,job_title
             user_id = int(row[0])
             user = user_counters[user_id]
-            for i in xrange(1,8):
+            for i in range(1,8):
                 user.set(OT_PRODUCT, CT_HAS, RT_SUM, (i-1, row[i]), 1, 0)
             user.set(OT_GENDER, CT_HAS, RT_SUM, row[8], 1, 0)
             user.set(OT_AGE, CT_HAS, RT_SUM, int(float(row[9])) if row[9] != '' else 0, 1, 0)
@@ -38,9 +38,9 @@ if __name__ == '__main__':
             user.set(OT_JOB, CT_HAS, RT_SUM, row[13], 1, 0)
 
     # READ ITEM CATALOGUE #
-    print "Reading catalogue"
+    print("Reading catalogue")
     targ = defaultdict(lambda:set())
-    with open(sys.argv[1]) as csvfile:
+    with open(sys.argv[1], encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         next(reader, None)
         for row in reader:
@@ -51,28 +51,30 @@ if __name__ == '__main__':
     event_dict = {'view' : CT_VIEW, 'like' : CT_LIKE, 'dislike' : CT_DISLIKE, 'skip' : CT_SKIP}
 
     # PARSE TRANSACTIONS #
-    print "Parsing transactions"
-    with open(sys.argv[3]) as csvfile:
+    print("Parsing transactions")
+    with open(sys.argv[3], encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         # customer_id,transaction_month,transaction_day,transaction_amt,merchant_id,merchant_mcc
         count = 1
         for row in reader:
+            if (len(row)) == 0: continue # stupid windows
             if count % 100000 == 0:
-                print count
+                print(count)
             count += 1
             user_id = int(row[0])
             ts = date_to_timestamp("2018-%2.2d-%2.2d 00:00:00" % (int(row[1]), int(row[2])))
             user.add(OT_MCC, CT_TRANSACTION, RT_SUM, row[5], float(row[3]), ts)
 
     # PARSE REACTIONS
-    print "Parsing reactions"
-    with open(sys.argv[2]) as csvfile:
+    print("Parsing reactions")
+    with open(sys.argv[2], encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         # customer_id,story_id,event_dttm,event
         count = 1
         for row in reader:
+            if (len(row)) == 0: continue # stupid windows
             if count % 100000 == 0:
-                print count
+                print(count)
             count += 1
 
             user_id = int(row[0])
@@ -101,12 +103,12 @@ if __name__ == '__main__':
 
                     item.update_from(user, OT_MCC, CT_TRANSACTION, RT_SUM, e, rt, ts)
 
-    print "Dumping user profiles"
-    with open(sys.argv[5], 'w') as user_pickle:
+    print("Dumping user profiles")
+    with open(sys.argv[5], 'wb') as user_pickle:
         pickle.dump(user_counters, user_pickle)
 
-    print "Dumping item profiles"
-    with open(sys.argv[6], 'w') as item_pickle:
+    print("Dumping item profiles")
+    with open(sys.argv[6], 'wb') as item_pickle:
         pickle.dump(item_counters, item_pickle)
 
 
