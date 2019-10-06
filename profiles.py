@@ -115,7 +115,7 @@ class Counters:
 
 
     def update_from(self, other, obj_type, cnt_type, red_type, to_cnt_type, to_red_type, ts, weight=1.):
-        for obj_id,counter in other.slice(obj_type, cnt_type, red_type).iteritems():
+        for obj_id,counter in other.slice(obj_type, cnt_type, red_type).items():
             self.add(obj_type, to_cnt_type, to_red_type, obj_id, counter.get(ts, red_type) * weight, ts)
 
 

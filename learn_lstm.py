@@ -60,9 +60,9 @@ def score(y_true, y_pred):
     return float(res) / len(y_true)
 
 def tf_score(y_true, y_pred):
-    print len(y_true)
-    print len(y_true[0])
-    print len(y_true[0][0])
+    print(len(y_true))
+    print(len(y_true[0]))
+    print(len(y_true[0][0]))
 
     return tf.double(0.)
     return tf.py_func(score, (y_true, y_pred), tf.double)
@@ -266,13 +266,13 @@ if __name__ == '__main__':
 
     user_map, item_map = load_users_and_items(sys.argv[4], sys.argv[5])
     #print len(user_map), len(item_map)
-    print "Load train"
+    print("Load train")
     left_train, left_x_train, right_train, y_train, w_train = load_set(sys.argv[1])
-    print "Load test"
+    print("Load test")
     left_test, left_x_test, right_test, y_test, w_test = load_valid_set(sys.argv[2], sys.argv[3])
 
     if True:
-        print "params:",EMBED_SIZE,LSTM_SIZE,RELU_SIZE,LSTM_DROPOUT,BATCH_SIZE,EPOCHS
+        print("params:",EMBED_SIZE,LSTM_SIZE,RELU_SIZE,LSTM_DROPOUT,BATCH_SIZE,EPOCHS)
         left_input = Input(shape=(SEQ_LENGTH,), dtype='int32')
         left_embed = Embedding(len(item_map) + 1, EMBED_SIZE, input_shape=(SEQ_LENGTH,))(left_input)
         left_x = Input(shape=(SEQ_LENGTH,4), dtype='float32')
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 
 
 
-        print "Model fit"
+        print("Model fit")
         model.fit([left_train, left_x_train, right_train],
             y_train,
             batch_size=BATCH_SIZE,
@@ -336,7 +336,7 @@ if __name__ == '__main__':
             #if n % 100 == 0:
             #    print r, p, e, v
             #    print s/n, n
-        print "SCORE",s/n, n
+        print("SCORE",s/n, n)
 
 
     #model.save(sys.argv[6])
