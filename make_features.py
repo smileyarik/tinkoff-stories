@@ -181,39 +181,42 @@ with open(sys.argv[5]) as csvfile:
             f.append(w)
 
         # 42-45
-        x = [np.array([user_map[user_id]]), np.array([item_map[item_id]])]
+        # TODO: vectorize
+        u = user_map[user_id]
+        x =  [np.array([x]) for x in (u.idx, u.gender, u.age, u.marital_status, u.job, item_map[item_id])]
         y = model.predict(x)[0]
         f.append(y[0])
         f.append(y[1])
         f.append(y[2])
         f.append(y[3])
 
-        # 46 - 99
-        for t in ['M', 'F']:
-            f.append(user.get(OT_GENDER, CT_HAS, RT_SUM, t, ts))
+        if False:
+            # 46 - 99
+            for t in ['M', 'F']:
+                f.append(user.get(OT_GENDER, CT_HAS, RT_SUM, t, ts))
 
-        for t in [0,15,20,25,30,35,40,45,50,55,60,65,70]:
-            f.append(user.get(OT_AGE, CT_HAS, RT_SUM, t, ts))
+            for t in [0,15,20,25,30,35,40,45,50,55,60,65,70]:
+                f.append(user.get(OT_AGE, CT_HAS, RT_SUM, t, ts))
 
-        for t in ['', 'CIV', 'DIV', 'MAR', 'UNM', 'WID']:
-            f.append(user.get(OT_MARITAL, CT_HAS, RT_SUM, t, ts))
+            for t in ['', 'CIV', 'DIV', 'MAR', 'UNM', 'WID']:
+                f.append(user.get(OT_MARITAL, CT_HAS, RT_SUM, t, ts))
 
-        for t in range(0,23):
-            f.append(user.get(OT_JOB, CT_HAS, RT_SUM, str(t), ts))
+            for t in range(0,23):
+                f.append(user.get(OT_JOB, CT_HAS, RT_SUM, str(t), ts))
 
-        for ct in [CT_LIKE, CT_VIEW, CT_SKIP, CT_DISLIKE]: # 12-35
-            #def counter_cos(user, item, ot_type, user_ct_type, item_ct_type, rt_type, ts):
-            #f.append(counter_cos(user, item, OT_MCC, CT_TRANSACTION, ct, RT_SUM, ts)) #
-            #f.append(counter_cos(user, item, OT_GENDER, CT_HAS, ct, RT_SUM, ts, True))
-            #user_slice = user.slice(OT_AGE, CT_HAS, RT_SUM)
-            #item_slice = item.slice(OT_AGE, ct, RT_SUM)
-            #f.append(counter_cos(user, item, OT_AGE, CT_HAS, ct, RT_SUM, ts))
-            #f.append(len(user_slice))
-            #f.append(len(item_slice))
-            #f.append(counter_cos(user, item, OT_JOB, CT_HAS, ct, RT_SUM, ts))
-            #f.append(counter_cos(user, item, OT_MARITAL, CT_HAS, ct, RT_SUM, ts))
-            #f.append(counter_cos(user, item, OT_PRODUCT, CT_HAS, ct, RT_SUM, ts))
-            pass
+            for ct in [CT_LIKE, CT_VIEW, CT_SKIP, CT_DISLIKE]: # 12-35
+                #def counter_cos(user, item, ot_type, user_ct_type, item_ct_type, rt_type, ts):
+                #f.append(counter_cos(user, item, OT_MCC, CT_TRANSACTION, ct, RT_SUM, ts)) #
+                #f.append(counter_cos(user, item, OT_GENDER, CT_HAS, ct, RT_SUM, ts, True))
+                #user_slice = user.slice(OT_AGE, CT_HAS, RT_SUM)
+                #item_slice = item.slice(OT_AGE, ct, RT_SUM)
+                #f.append(counter_cos(user, item, OT_AGE, CT_HAS, ct, RT_SUM, ts))
+                #f.append(len(user_slice))
+                #f.append(len(item_slice))
+                #f.append(counter_cos(user, item, OT_JOB, CT_HAS, ct, RT_SUM, ts))
+                #f.append(counter_cos(user, item, OT_MARITAL, CT_HAS, ct, RT_SUM, ts))
+                #f.append(counter_cos(user, item, OT_PRODUCT, CT_HAS, ct, RT_SUM, ts))
+                pass
 
         feat_out.write('%d\t%d\t%f\t%d\t%s\n' % (user_id, item_id, target, pid, '\t'.join([str(ff) for ff in f])))
 
