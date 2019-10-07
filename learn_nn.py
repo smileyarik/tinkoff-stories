@@ -184,25 +184,6 @@ if __name__ == '__main__':
             [np.array(x) for x in (user_test, gender_test, age_test, marital_statuses_test, jobs_test, item_test)],
             np.array(y_test)),
         #validation_split=0.2,
-        verbose=2)#
-
-    with open('predict.nn', 'w') as p_out:
-        predicts = model.predict([np.array(x) for x in (user_test, gender_test, age_test, marital_statuses_test, jobs_test, item_test)])
-        sum_target = 0.
-        sum_score = 0.
-        for i in range(len(y_test)):
-            t = y_test[i]
-            y = predicts[i]
-            target = -10.*t[0] - 0.1*t[1] + 0.1*t[2] + 0.5*t[3]
-            predict = -10.*y[0] - 0.1*y[1] + 0.1*y[2] + 0.5*y[3]
-            sum_target += target if target > 0 else -target
-            sum_score += target * (1 if predict > 0 else -1)
-            p_out.write("%f\t%f\t%s\n" % (target, predict, "\t".join([str(yy) for yy in y])))
-        print(sum_target, sum_score, sum_target/len(y_test), sum_score/len(y_test), sum_score / sum_target)
-        print(score(y_test, predicts))
-        print(score(predicts, y_test))
+        verbose=2)
         
-
-
-
     model.save(sys.argv[5])
