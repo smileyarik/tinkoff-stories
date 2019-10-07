@@ -12,9 +12,9 @@ ver="002"
 #exit
 
 export OPENBLAS_NUM_THREADS=1;
-python learn_nn.py ../data/tr_st_reactions.csv ../data/tr_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/tr_model_$nnver.bin
-python learn_nn.py ../data/vl_st_reactions.csv ../data/vl_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/vl_model_$nnver.bin
-python learn_nn.py ../data/tt_st_reactions.csv ../data/vl_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/tt_model_$nnver.bin
+#python learn_nn.py ../data/tr_st_reactions.csv ../data/tr_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/tr_model_$nnver.bin
+#python learn_nn.py ../data/vl_st_reactions.csv ../data/vl_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/vl_model_$nnver.bin
+#python learn_nn.py ../data/tt_st_reactions.csv ../data/vl_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/tt_model_$nnver.bin
 
 # exit
 
