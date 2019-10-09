@@ -3,6 +3,7 @@ import sys
 import json
 from profiles import *
 from make_profiles import *
+from learn_lstm import *
 import numpy as np
 #import tensorflow as tf
 #tf.enable_eager_execution()
@@ -26,6 +27,16 @@ feat_out = open(sys.argv[6], 'w')
 
 user_map, item_map = load_users_and_items(sys.argv[8], sys.argv[9])
 model = load_model(sys.argv[7])
+#model_lstm = load_model(sys.argv[10])
+
+descr = {}
+with open(sys.argv[10]) as csvfile:
+    reader = csv.reader(csvfile, delimiter=',')
+    next(reader, None)
+    for row in reader:
+        item_id = int(row[0])
+        descr[item_id] = row[1]
+        #pages = row[1].count('story-page')
 
 weights = {'like' : 0.5, 'view' : 0.1, 'skip' : -0.1, 'dislike' : -10}
 weights2 = {CT_LIKE : 0.5, CT_VIEW : 0.1, CT_SKIP : -0.1, CT_DISLIKE : -10}
@@ -182,7 +193,7 @@ with open(sys.argv[5]) as csvfile:
         f.append(y[2])
         f.append(y[3])
 
-        # 46 - 99
+        # 46 - 89
         for t in ['M', 'F']:
             f.append(user.get(OT_GENDER, CT_HAS, RT_SUM, t, ts))
 
@@ -194,6 +205,10 @@ with open(sys.argv[5]) as csvfile:
 
         for t in xrange(0,23):
             f.append(user.get(OT_JOB, CT_HAS, RT_SUM, str(t), ts))
+
+        f.append(ts - start_ts) #90
+        f.append(descr[item_id].count('story-page') if item_id in descr else 0.) # 91
+        f.append(descr[item_id].count('tinkoffbank:') if item_id in descr else 0.) # 92
 
         for ct in [CT_LIKE, CT_VIEW, CT_SKIP, CT_DISLIKE]: # 12-35
             #def counter_cos(user, item, ot_type, user_ct_type, item_ct_type, rt_type, ts):

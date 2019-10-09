@@ -54,10 +54,10 @@ eval_pool = Pool(data=sys.argv[2], column_description='cd')
 #                           iterations=int(sys.argv[4]),
 #                           ignored_features=[])
 model = CatBoostClassifier(loss_function='MultiClass',
-                           eval_metric=CustomMetric(),
+                           #eval_metric=CustomMetric(),
                            iterations=int(sys.argv[4]),
-                           ignored_features=[])
-                           #ignored_features=xrange(46,100))
+                           #ignored_features=[])
+                           ignored_features=xrange(46,93))
 
 # Fit model
 model.fit(train_pool, eval_set=eval_pool)
