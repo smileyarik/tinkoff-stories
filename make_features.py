@@ -224,13 +224,13 @@ for (idx, row) in iter_rows(sys.argv[5]):
         f.append(p_dislike)
         f.append(w)
 
-    # 42-49
-    for pred in (nnet_predictions, nnet2_predictions):
+    # 42-45
+    for pred in (nnet2_predictions, ): #nnet_predictions
         y = nnet_predictions[idx]
         for i in range(4):
             f.append(y[i])
 
-    # 50, 51
+    # 46, 47
     for t in ['M', 'F']:
         f.append(user.get(OT_GENDER, CT_HAS, RT_SUM, t, ts))
 
@@ -239,7 +239,7 @@ for (idx, row) in iter_rows(sys.argv[5]):
         if user.get(OT_AGE, CT_HAS, RT_SUM, t, ts) != 0:
             age = t
 
-    # 52
+    # 48
     f.append(age)
 
     if False:

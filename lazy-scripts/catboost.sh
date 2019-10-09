@@ -1,0 +1,1 @@
+/d/Projects/catboost/msvs/Release/catboost/app/catboost.exe $*
