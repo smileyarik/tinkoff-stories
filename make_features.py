@@ -209,8 +209,8 @@ for (idx, row) in iter_rows(sys.argv[5]):
             s += item.get(OT_GLOBAL, event, rt, '', ts) * weights2[event]
     f.append(try_div(s, item_size, -100)) # 11
 
-    for ot in [OT_GENDER, OT_AGE, OT_JOB, OT_MARITAL, OT_PRODUCT, OT_MCC]: # 12-41
-        user_ct = CT_HAS if ot != OT_MCC else CT_TRANSACTION
+    for ot in [OT_GENDER, OT_AGE, OT_JOB, OT_MARITAL, OT_PRODUCT, OT_MCC]: # 12-35
+        user_ct = CT_HAS if ot != OT_MCC else CT_TRANSACTION_AMOUNT_RATIO
 
         #def cos_prob(user, item, ot_type, user_ct_type, event_ct_type, show_ct_type, rt_type, ts):
         p_like = cos_prob(user, item, ot, user_ct, CT_LIKE, CT_SHOW, RT_SUM, ts)
@@ -222,16 +222,16 @@ for (idx, row) in iter_rows(sys.argv[5]):
         f.append(p_view)
         f.append(p_skip)
         f.append(p_dislike)
-        f.append(w)
+        # f.append(w)
 
-    # 42-51
+    # 36-43
     for pred in (nnet_predictions, nnet2_predictions):
         y = pred[idx]
         for i in range(4):
             f.append(y[i])
-        f.append(-10*y[0] - 0.1*y[1] + 0.1*y[2] + 0.5*y[3])
+        # f.append(-10*y[0] - 0.1*y[1] + 0.1*y[2] + 0.5*y[3])
 
-    # 52, 53
+    # 44, 45
     for t in ['M', 'F']:
         f.append(user.get(OT_GENDER, CT_HAS, RT_SUM, t, ts))
 
@@ -239,9 +239,15 @@ for (idx, row) in iter_rows(sys.argv[5]):
     for t in [0,15,20,25,30,35,40,45,50,55,60,65,70]:
         if user.get(OT_AGE, CT_HAS, RT_SUM, t, ts) != 0:
             age = t
+    f.append(age) # 46
 
-    # 54
-    f.append(age)
+    txn_total_amount = user.get(OT_GLOBAL, CT_TRANSACTION_AMOUNT, RT_SUM, '', 0)
+    txn_count = user.get(OT_GLOBAL, CT_TRANSACTION_COUNT, RT_SUM, '', 0)
+    txn_dates_count = len(user.slice(OT_GLOBAL, CT_TRANSACTION_DATE, RT_SUM))
+
+    # TODO: check if it overfits
+    f.append(try_div(txn_total_amount,  txn_count, -100.)) # 47
+    f.append(try_div(txn_count, txn_dates_count, -100.)) # 48
 
     if False:
         for t in ['M', 'F']:
