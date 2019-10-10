@@ -10,8 +10,6 @@ ver="003"
 #python make_profiles.py ../src_data/stories_description.csv ../data/vl_st_reactions.csv ../data/tt_st_transactions.csv ../src_data/customer_test.csv ../data/vl_user_pickle.bin ../data/vl_item_pickle.bin
 #python make_profiles.py ../src_data/stories_description.csv ../data/tt_st_reactions.csv ../data/tt_st_transactions.csv ../src_data/customer_test.csv ../data/tt_user_pickle.bin ../data/tt_item_pickle.bin
 
-#exit
-
 export OPENBLAS_NUM_THREADS=1;
 #python learn_nn2.py ../data/tr_st_reactions.csv ../data/tr_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/tr_model_002.bin
 #python learn_nn2.py ../data/vl_st_reactions.csv ../data/vl_tg_reactions.csv ../src_data/customer_test.csv ../data/all_story_id.txt ../data/vl_model_002.bin

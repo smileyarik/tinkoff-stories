@@ -1,8 +1,11 @@
+ignore="-I 28-31:32-35"
+
 bash catboost.sh fit -m multi-nw.catboost -t validate_multi.txt -f train_multi.txt --cd cd.txt $ignore -i 1000 -w 0.01 --loss-function MultiClass
+bash catboost.sh fit -m multi.catboost -t validate_multi.txt -f train_multi.txt --cd cd-noweights.txt $ignore -i 1000 -w 0.03 --loss-function MultiClass
+
+#exit
 
 bash catboost.sh fit -m classif.catboost -t validate_classif.txt -f train_classif.txt --cd cd.txt $ignore -i 1000 -w 0.01 --loss-function Logloss
-bash catboost.sh fit -m multi.catboost -t validate_multi.txt -f train_multi.txt --cd cd-noweights.txt $ignore -i 1000 -w 0.03 --loss-function MultiClass
-bash catboost.sh fit -m multi-nw.catboost -t validate_multi.txt -f train_multi.txt --cd cd.txt $ignore -i 1000 -w 0.01 --loss-function MultiClass
 bash catboost.sh fit -m sigm0.catboost -t validate_classif.txt -f train_classif.txt --cd cd.txt $ignore -i 1000 -w 0.01 --loss-function UserPerObjMetric:alpha=0
 bash catboost.sh fit -m sigm1.catboost -t validate_classif.txt -f train_classif.txt --cd cd.txt $ignore -i 1000 -w 0.01 --loss-function UserPerObjMetric:alpha=1
 bash catboost.sh fit -m sigm2.catboost -t validate_classif.txt -f train_classif.txt --cd cd.txt $ignore -i 1000 -w 0.01 --loss-function UserPerObjMetric:alpha=2
