@@ -22,7 +22,7 @@ if __name__ == '__main__':
     user_counters = defaultdict(make_counters)
 
     print("Read user catalogue")
-    with open(sys.argv[4], encoding="utf-8") as csvfile:
+    with open(sys.argv[4]) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         next(reader, None)
         for row in reader:
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # READ ITEM CATALOGUE #
     print("Reading catalogue")
     targ = defaultdict(lambda:set())
-    with open(sys.argv[1], encoding="utf-8") as csvfile:
+    with open(sys.argv[1]) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         next(reader, None)
         for row in reader:
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     # PARSE TRANSACTIONS #
     print("Parsing transactions")
-    with open(sys.argv[3], encoding="utf-8") as csvfile:
+    with open(sys.argv[3]) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         # customer_id,transaction_month,transaction_day,transaction_amt,merchant_id,merchant_mcc
         count = 1
@@ -63,23 +63,12 @@ if __name__ == '__main__':
             count += 1
             user_id = int(row[0])
             user = user_counters[user_id]
-            month, day = int(row[1]), int(row[2])
-            ts = date_to_timestamp("2018-%2.2d-%2.2d 00:00:00" % (month, day))
-            amount = float(row[3]) + 250 # transaction amounts are rounded down with precision of 500
-            mcc = row[5]
-            user.add(OT_MCC, CT_TRANSACTION_AMOUNT, RT_SUM, mcc, amount, ts)
-            user.add(OT_GLOBAL, CT_TRANSACTION_COUNT, RT_SUM, '', 1, ts)
-            user.add(OT_GLOBAL, CT_TRANSACTION_DATE, RT_SUM, "%2d-%2d" % (month, day), 1, ts)
-            user.add(OT_GLOBAL, CT_TRANSACTION_AMOUNT, RT_SUM, '', amount, ts)
-
-        for user_id, user in user_counters.items():
-            total_amount = user.get(OT_GLOBAL, CT_TRANSACTION_AMOUNT, RT_SUM, '', 0)
-            for mcc, amount in user.slice(OT_MCC, CT_TRANSACTION_AMOUNT, RT_SUM).items():
-                user.add(OT_MCC, CT_TRANSACTION_AMOUNT_RATIO, RT_SUM, mcc, amount.get(0, RT_SUM) / total_amount, 0)
+            ts = date_to_timestamp("2018-%2.2d-%2.2d 00:00:00" % (int(row[1]), int(row[2])))
+            user.add(OT_MCC, CT_TRANSACTION, RT_SUM, row[5], float(row[3]), ts)
 
     # PARSE REACTIONS
     print("Parsing reactions")
-    with open(sys.argv[2], encoding="utf-8") as csvfile:
+    with open(sys.argv[2]) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         # customer_id,story_id,event_dttm,event
         count = 1
@@ -113,7 +102,7 @@ if __name__ == '__main__':
                     item.update_from(user, OT_CHILDREN, CT_VALUE, RT_SUM, e, rt, ts)
                     item.update_from(user, OT_JOB, CT_HAS, RT_SUM, e, rt, ts)
 
-                    item.update_from(user, OT_MCC, CT_TRANSACTION_AMOUNT_RATIO, RT_SUM, e, rt, ts)
+                    item.update_from(user, OT_MCC, CT_TRANSACTION, RT_SUM, e, rt, ts)
 
     print("Dumping user profiles")
     with open(sys.argv[5], 'wb') as user_pickle:

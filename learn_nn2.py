@@ -37,7 +37,7 @@ class User:
 def load_users_and_items(user_file, item_file):
     user_map = {}
     i = 1
-    with open(user_file, encoding="utf-8") as csvfile:
+    with open(user_file) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         next(reader, None)
         for row in reader:
@@ -54,7 +54,7 @@ def load_users_and_items(user_file, item_file):
 
     item_map = {}
     i = 1
-    with open(item_file, encoding="utf-8") as csvfile:
+    with open(item_file) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             if (len(row)) == 0: continue # stupid windows
@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     item_input = Input(shape=(1,), dtype='int32')
     item_embed = Dropout(embedding_droupout_rate)(Embedding(len(item_map) + 1, EMBED_SIZE, input_length=1)(item_input))
-    
+
     dot_layers = []
     for i in range(4):
         user_dense = Dropout(0.2)(Flatten()(Dense(EMBED_SIZE)(full_user_embed)))
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         items = []
         ys = []
 
-        for line in open(path, encoding="utf-8"):
+        for line in open(path):
             line = line.strip()
             if len(line) == 0: continue # stupid windows
             ff = line.split(',')
