@@ -77,7 +77,7 @@ def cos_prob(user, item, ot_type, user_ct_type, event_ct_type, show_ct_type, rt_
 
         item_mod += v*v
         if key in user_slice and key in event_slice:
-            prod += user_slice[key].get(ts, rt_type) * event_slice[key].get(ts, rt_type) / float(v)
+            prod += (user_slice[key].get(ts, rt_type) * event_slice[key].get(ts, rt_type) / float(v) if v > 0 else 0.)
 
     if user_mod == 0 or item_mod == 0:
         return -100.
